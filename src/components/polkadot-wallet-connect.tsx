@@ -45,7 +45,7 @@ export function PolkadotWalletConnectDialog({
 }: PolkadotWalletConnectDialogProps) {
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="w-[400px] w-[calc(100vw-20px)] rounded-[10px]">
+      <DialogContent className="w-[calc(100vw-20px)] rounded-[10px] md:w-[400px]">
         <DialogHeader>
           <DialogTitle>Connect Wallet</DialogTitle>
         </DialogHeader>

@@ -63,7 +63,8 @@ export function RecipientModal({
               placeholder="Enter recipient address"
               className={cn(
                 'w-full bg-transparent text-[14px] font-bold text-[#242A2E] placeholder:text-[#12161950] focus-visible:outline-none',
-                isError && 'text-[#FF2D20]'
+                isError && 'text-[#FF2D20]',
+                !!address && 'font-mono tabular-nums'
               )}
             />
           </div>

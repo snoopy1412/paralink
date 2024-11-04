@@ -28,9 +28,10 @@ export function AddressInput({ value, onEdit }: AddressInputProps) {
         <span
           title={address}
           className={cn(
-            'truncate text-[14px] font-normal text-[#12161950]',
+            'truncate font-mono text-[14px] font-normal tabular-nums text-[#12161950]',
             address && 'text-[#242A2E]',
-            address && 'font-bold'
+            address && 'font-bold',
+            address && 'font-mono tabular-nums'
           )}
         >
           {address ? address : 'Enter Recipient Address'}

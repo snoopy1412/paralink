@@ -14,7 +14,7 @@ export function Connected() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-[25px] px-[10px] py-[8px]">
+        <Button variant="outline" className="gap-[5px] px-[10px] py-[8px]">
           <Image
             src="/images/wallet/polkadot.png"
             alt="wallet"

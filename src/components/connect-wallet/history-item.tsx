@@ -10,7 +10,9 @@ export const HistoryItem = () => {
       </div>
 
       <div className="flex flex-col items-end">
-        <p className="font-semibold text-[#242A2E]">0.42USDT</p>
+        <p className="font-semibold text-[#242A2E]">
+          <span className="font-mono tabular-nums">0.42</span> USDT
+        </p>
         <span className="text-[#12161950]">Completed·1 mo gao</span>
       </div>
     </div>

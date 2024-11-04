@@ -39,7 +39,7 @@ export function FeeBreakdown({
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              'text-[14px] font-bold text-[#12161950]',
+              'font-mono text-[14px] font-bold tabular-nums text-[#12161950]',
               isExpanded && 'text-[#242A2E]'
             )}
           >
@@ -89,10 +89,12 @@ export function FeeBreakdown({
               <div className="flex items-center justify-between">
                 <span className="leading-[24px]">Network Fee</span>
                 <div className="flex items-center gap-[10px]">
-                  <span className="text-[#12161950]">
+                  <span className="font-mono tabular-nums text-[#12161950]">
                     ≈ ${networkFee?.toFixed(2)}
                   </span>
-                  <span>{networkFee?.toFixed(3)}</span>
+                  <span className="font-mono tabular-nums">
+                    {networkFee?.toFixed(3)}
+                  </span>
                   <Image
                     src="/images/test3.svg"
                     alt="info"
@@ -105,10 +107,12 @@ export function FeeBreakdown({
               <div className="flex items-center justify-between">
                 <span className="leading-[24px]">Cross-Chain Fee</span>
                 <div className="flex items-center gap-[10px]">
-                  <span className="text-[#12161950]">
+                  <span className="font-mono tabular-nums text-[#12161950]">
                     ≈ ${crossChainFee?.toFixed(3)}
                   </span>
-                  <span>{crossChainFee?.toFixed(3)}</span>
+                  <span className="font-mono tabular-nums">
+                    {crossChainFee?.toFixed(3)}
+                  </span>
                   <Image
                     src="/images/test3.svg"
                     alt="info"
@@ -123,10 +127,12 @@ export function FeeBreakdown({
                   You Will Receive (Estimated)
                 </span>
                 <div className="flex items-center gap-[10px]">
-                  <span className="text-[#12161950]">
+                  <span className="font-mono tabular-nums text-[#12161950]">
                     ≈ ${finalAmount?.toFixed(2)}
                   </span>
-                  <span>{finalAmount?.toFixed(3)}</span>
+                  <span className="font-mono tabular-nums">
+                    {finalAmount?.toFixed(3)}
+                  </span>
                   <Image
                     src="/images/test3.svg"
                     alt="info"

@@ -10,7 +10,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 import { ExternalLink, Search } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Empty } from './empty';
 
 interface Token {
@@ -48,6 +48,12 @@ export function TokenSelectDialog({
     );
   }, [tokens, searchQuery]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setSearchQuery('');
+    }
+  }, [isOpen]);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-20px)] gap-0 rounded-[10px] p-0 md:w-[420px]">
@@ -63,7 +69,7 @@ export function TokenSelectDialog({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Enter Token Name, Symbol, or Contract Address"
-              className="h-[24px] flex-1 bg-transparent text-[14px] font-normal leading-[24px] text-[#12161950] focus-visible:outline-none"
+              className="h-[24px] flex-1 bg-transparent text-[12px] font-normal leading-[24px] text-[#12161950] focus-visible:outline-none md:text-[14px]"
             />
             <Search
               className="h-4 w-4 transition-opacity hover:opacity-80"
@@ -102,12 +108,12 @@ export function TokenSelectDialog({
                             <span className="truncate text-[16px] font-bold leading-normal">
                               {token.symbol}
                             </span>
-                            <div className="flex items-center gap-[5px]">
+                            <div className="item-start flex flex-col gap-[5px] md:flex-row md:items-center">
                               <span className="text-[12px] text-[#121619]">
                                 {token.name}
                               </span>
                               <div className="flex items-center gap-[5px]">
-                                <span className="text-[12px] text-[#878A92]">
+                                <span className="font-mono text-[12px] tabular-nums text-[#878A92]">
                                   {token.address.slice(0, 6)}...
                                   {token.address.slice(-6)}
                                 </span>
@@ -118,7 +124,7 @@ export function TokenSelectDialog({
                               </div>
                             </div>
                           </div>
-                          <span className="text-right text-[16px] font-bold">
+                          <span className="text-right font-mono text-[16px] font-bold tabular-nums">
                             {token.balance}
                           </span>
                         </div>

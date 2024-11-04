@@ -1,10 +1,15 @@
-import { JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import './globals.css';
 import type { Metadata } from 'next';
 
-// // 等宽字体(用于代码、数字等)
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap'
+});
+
 const jetBrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
@@ -24,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${jetBrainsMono.className} flex min-h-dvh w-screen flex-col antialiased`}
+        className={`${inter.variable} ${jetBrainsMono.variable} flex min-h-dvh w-screen flex-col font-sans antialiased`}
       >
         <header className="h-[var(--header-height)]">
           <Header />

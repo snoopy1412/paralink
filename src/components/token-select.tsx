@@ -66,13 +66,14 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
               <ChevronDown className="h-4 w-4" />
             </div>
             <span className="text-[12px] font-normal leading-normal text-[#12161950]">
-              Balance: {token.balance}
+              Balance:
+              <span className="font-mono tabular-nums">{token.balance}</span>
             </span>
           </div>
           <div className="flex flex-col items-end">
             <input
               className={cn(
-                'w-full bg-transparent text-right text-[18px] font-bold text-[#12161950] focus-visible:outline-none',
+                'w-full bg-transparent text-right font-mono text-[18px] font-bold tabular-nums text-[#12161950] focus-visible:outline-none',
                 'md:text-[24px]',
                 value && 'text-[#121619]'
               )}
@@ -89,7 +90,7 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            <span className="text-[12px] font-normal leading-normal text-[#12161950]">
+            <span className="font-mono text-[12px] font-normal tabular-nums leading-normal text-[#12161950]">
               ≈ $0.00
             </span>
           </div>
