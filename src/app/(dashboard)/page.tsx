@@ -63,7 +63,7 @@ export default function Dashboard() {
         />
       </div>
 
-      <div className="container mt-[120px] flex flex-col gap-[30px] md:mt-[100px]">
+      <div className="container flex flex-col gap-[30px] pt-[min(120px,15vh)] md:pt-[min(100px,12vh)]">
         <div className="mx-auto flex w-full flex-col gap-[20px] rounded-[var(--radius)] bg-white p-[15px] shadow-sm md:w-[460px] md:rounded-[var(--radius-lg)] md:p-[20px]">
           <div className="flex items-center gap-[10px]">
             <ChainSelect
