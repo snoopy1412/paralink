@@ -51,7 +51,6 @@ export function RecipientModal({
           <DialogTitle className="text-[14px] font-bold text-[#121619]">
             Send To
           </DialogTitle>
-          {/* <DialogClose /> */}
         </DialogHeader>
         <div className="my-[20px] h-[1px] w-full bg-[#12161910]"></div>
 
@@ -94,7 +93,7 @@ export function RecipientModal({
           </div>
 
           <div className="flex items-center gap-[20px] rounded-[10px] bg-[#FF00831A] p-[20px]">
-            <div className="grid grid-cols-2 gap-[10px]">
+            <div className="hidden grid-cols-2 gap-[10px] md:grid">
               <Image
                 src="/images/wallet/metamask.png"
                 width={46}

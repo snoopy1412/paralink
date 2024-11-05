@@ -37,7 +37,7 @@ export function TransactionDetail({ isOpen, onClose }: TransactionDetailProps) {
           <div className="flex w-full flex-col gap-[20px] text-[14px]">
             <div className="flex flex-1 flex-col gap-[20px]">
               <div className="flex items-center">
-                <span className="w-[100px] font-normal leading-[24px] text-[#242A2E]">
+                <span className="w-[80px] font-normal leading-[24px] text-[#242A2E] sm:w-[100px]">
                   Timestamp
                 </span>
                 <span className="flex-1 text-[14px] font-bold leading-normal text-[#242A2E]">
@@ -45,7 +45,7 @@ export function TransactionDetail({ isOpen, onClose }: TransactionDetailProps) {
                 </span>
               </div>
               <div className="flex items-center">
-                <span className="w-[100px] font-mono font-normal tabular-nums leading-[24px] text-[#242A2E]">
+                <span className="w-[80px] font-mono font-normal tabular-nums leading-[24px] text-[#242A2E] sm:w-[100px]">
                   Amount
                 </span>
                 <span className="flex-1 font-mono text-[14px] font-bold tabular-nums leading-normal text-[#242A2E]">

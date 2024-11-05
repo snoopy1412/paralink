@@ -89,8 +89,11 @@ export function FeeBreakdown({
               <div className="flex items-center justify-between">
                 <span className="leading-[24px]">Network Fee</span>
                 <div className="flex items-center gap-[10px]">
-                  <span className="font-mono tabular-nums text-[#12161950]">
-                    ≈ ${networkFee?.toFixed(2)}
+                  <span className="hidden text-[#12161950] sm:block">
+                    ≈ $
+                    <span className="font-mono tabular-nums">
+                      {networkFee?.toFixed(2)}
+                    </span>
                   </span>
                   <span className="font-mono tabular-nums">
                     {networkFee?.toFixed(3)}
@@ -107,8 +110,11 @@ export function FeeBreakdown({
               <div className="flex items-center justify-between">
                 <span className="leading-[24px]">Cross-Chain Fee</span>
                 <div className="flex items-center gap-[10px]">
-                  <span className="font-mono tabular-nums text-[#12161950]">
-                    ≈ ${crossChainFee?.toFixed(3)}
+                  <span className="hidden text-[#12161950] sm:block">
+                    ≈ $
+                    <span className="font-mono tabular-nums">
+                      {crossChainFee?.toFixed(3)}
+                    </span>
                   </span>
                   <span className="font-mono tabular-nums">
                     {crossChainFee?.toFixed(3)}
@@ -127,8 +133,11 @@ export function FeeBreakdown({
                   You Will Receive (Estimated)
                 </span>
                 <div className="flex items-center gap-[10px]">
-                  <span className="font-mono tabular-nums text-[#12161950]">
-                    ≈ ${finalAmount?.toFixed(2)}
+                  <span className="hidden text-[#12161950] sm:block">
+                    ≈ $
+                    <span className="font-mono tabular-nums">
+                      {finalAmount?.toFixed(2)}
+                    </span>
                   </span>
                   <span className="font-mono tabular-nums">
                     {finalAmount?.toFixed(3)}

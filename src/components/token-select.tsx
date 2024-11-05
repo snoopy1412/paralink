@@ -40,6 +40,7 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
   const { value, handleChange, handleBlur } = useNumberInput({
     // maxDecimals: 6,
     // maxValue: 1000000,
+    maxDecimals: 10000,
     minValue: 0,
     initialValue: '',
     onChange: (value) => console.log('Current value:', value)
@@ -48,6 +49,8 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
   function handleOpenDialog() {
     setIsDialogOpen(true);
   }
+
+  console.log('value', value);
 
   return (
     <>
@@ -78,20 +81,13 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
                 value && 'text-[#121619]'
               )}
               placeholder="0.00"
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck="false"
-              data-form-type="other"
+              type="number"
               value={value}
               onChange={handleChange}
               onBlur={handleBlur}
             />
-            <span className="font-mono text-[12px] font-normal tabular-nums leading-normal text-[#12161950]">
-              ≈ $0.00
+            <span className="text-[12px] font-normal leading-normal text-[#12161950]">
+              ≈ $ <span className="font-mono tabular-nums">0.00</span>
             </span>
           </div>
         </div>

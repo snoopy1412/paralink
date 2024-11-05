@@ -10,7 +10,7 @@ const FooterSocials = () => {
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative size-[24px] transition-opacity hover:opacity-80 active:scale-95 active:opacity-80"
+          className="relative flex size-[24px] items-center justify-center transition-opacity hover:opacity-80 active:scale-95 active:opacity-80"
         >
           <Image
             src={iconPath}

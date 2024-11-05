@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
 import { AddressInput } from '@/components/address-input';
@@ -64,7 +64,7 @@ export default function Dashboard() {
       </div>
 
       <div className="container mt-[120px] flex flex-col gap-[30px] md:mt-[100px]">
-        <div className="mx-auto flex w-full flex-col gap-[20px] rounded-[var(--radius-lg)] bg-white p-[20px] shadow-sm md:w-[460px]">
+        <div className="mx-auto flex w-full flex-col gap-[20px] rounded-[var(--radius)] bg-white p-[15px] shadow-sm md:w-[460px] md:rounded-[var(--radius-lg)] md:p-[20px]">
           <div className="flex items-center gap-[10px]">
             <ChainSelect
               label="From"
