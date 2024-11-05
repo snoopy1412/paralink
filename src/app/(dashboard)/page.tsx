@@ -10,6 +10,9 @@ import { TokenSelect } from '@/components/token-select';
 import { Button } from '@/components/ui/button';
 import { TransactionDetail } from '@/components/transaction-detail';
 
+import projectsInfo from '@/assets/external/projects-info';
+import AssetsInfo from '@/assets/external/assets-info';
+
 const chains = [
   {
     id: 'assethub',
@@ -38,6 +41,9 @@ export default function Dashboard() {
   const [fromChain, setFromChain] = useState<string>();
   const [toChain, setToChain] = useState<string>();
   const [selectedToken, setSelectedToken] = useState(mockTokens[0]);
+
+  console.log('projectsInfo', projectsInfo);
+  console.log('AssetsInfo', AssetsInfo);
 
   return (
     <>
