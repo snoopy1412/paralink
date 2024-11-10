@@ -5,9 +5,9 @@ import { ChainSelect } from '@/components/chain-select';
 import type { ChainInfoWithXcAssetsData } from '@/store/chains';
 
 interface ChainSwitcherProps {
-  fromChainId: string;
+  fromChainId?: string;
   fromChain?: ChainInfoWithXcAssetsData;
-  toChainId: string;
+  toChainId?: string;
   toChain?: ChainInfoWithXcAssetsData;
   fromParachains?: ChainInfoWithXcAssetsData[];
   toParachains?: ChainInfoWithXcAssetsData[];

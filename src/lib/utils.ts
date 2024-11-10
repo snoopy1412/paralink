@@ -43,3 +43,27 @@ export function isValidAddress({
     return false;
   }
 }
+
+export const convertToEvmRpcUrls = (providers: Record<string, string>) => {
+  const httpUrls: Record<string, string> = {};
+
+  Object.entries(providers).forEach(([name, url]) => {
+    if (url.startsWith('wss://')) {
+      httpUrls[name] = url.replace('wss://', 'https://');
+    } else {
+      httpUrls[name] = url;
+    }
+  });
+
+  return {
+    default: {
+      http: Object.values(httpUrls)
+    }
+  };
+};
+
+export function toShortAddress(address: string) {
+  return address.length > 16
+    ? `${address.slice(0, 6)}...${address.slice(-4)}`
+    : address;
+}

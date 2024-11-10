@@ -7,6 +7,9 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { useWalletStore } from '@/store/wallet';
+import { Loader2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface PolkadotWalletOption {
   id: string;
@@ -21,12 +24,12 @@ const walletOptions: PolkadotWalletOption[] = [
     icon: '/images/wallet/talisman.png'
   },
   {
-    id: 'polkadot',
+    id: 'polkadot-js',
     name: 'Polkadot',
     icon: '/images/wallet/polkadot.png'
   },
   {
-    id: 'subwallet',
+    id: 'subwallet-js',
     name: 'Subwallet',
     icon: '/images/wallet/subwallet.png'
   }
@@ -35,16 +38,31 @@ const walletOptions: PolkadotWalletOption[] = [
 interface PolkadotWalletConnectDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectWallet: (walletId: string) => void;
 }
 
 export function PolkadotWalletConnectDialog({
   isOpen,
-  onClose,
-  onSelectWallet
+  onClose
 }: PolkadotWalletConnectDialogProps) {
+  const { connectWallet, isConnecting } = useWalletStore();
+
+  const handleWalletSelect = async (walletId: string) => {
+    try {
+      await connectWallet(walletId);
+      onClose();
+    } catch (error) {
+      console.log('error', error);
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to connect wallet',
+        {
+          duration: 3_000
+        }
+      );
+    }
+  };
+
   return (
-    <Dialog open={true} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[calc(100vw-20px)] rounded-[10px] md:w-[400px]">
         <DialogHeader>
           <DialogTitle>Connect Wallet</DialogTitle>
@@ -54,7 +72,7 @@ export function PolkadotWalletConnectDialog({
           {walletOptions.map((wallet) => (
             <div
               key={wallet.id}
-              onClick={() => onSelectWallet(wallet.id)}
+              onClick={() => handleWalletSelect(wallet.id)}
               className="flex w-full cursor-pointer items-center gap-[20px] rounded-[10px] bg-[#F2F3F5] p-[20px] transition-opacity hover:opacity-80"
             >
               <div className="relative h-[54px] w-[54px]">
@@ -66,6 +84,9 @@ export function PolkadotWalletConnectDialog({
                 />
               </div>
               <span className="text-[18px] font-bold">{wallet.name}</span>
+              {isConnecting && (
+                <Loader2 className="ml-auto h-4 w-4 animate-spin" />
+              )}
             </div>
           ))}
         </div>

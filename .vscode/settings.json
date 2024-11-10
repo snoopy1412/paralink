@@ -4,6 +4,8 @@
         "parachain",
         "Parachains",
         "Paralink",
-        "polkadot"
+        "polkadot",
+        "rainbowkit",
+        "Wagmi"
     ]
 }

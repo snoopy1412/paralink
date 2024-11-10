@@ -2,26 +2,23 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-import { ChevronDown } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
-import { cn } from '@/lib/utils';
 import { Empty } from './empty';
 import type { ChainInfoWithXcAssetsData } from '@/store/chains';
-// import assets from '@/types/assets.json';
-// import { getTokenFromXcAsset } from '@/assets/registry';
 
 interface ChainSelectProps {
   label: string;
   chain?: ChainInfoWithXcAssetsData;
   chains?: ChainInfoWithXcAssetsData[];
-  value: string;
+  value?: string;
   onChange: (value: string) => void;
 }
 
