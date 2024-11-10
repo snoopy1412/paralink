@@ -60,25 +60,68 @@ export function getTokenFromXcAsset({
   const possibleSlugs = [
     `${nativeChainID}-NATIVE-${symbol}`,
     `${nativeChainID}-LOCAL-${symbol}`,
+    `${nativeChainID}-LOCAL-ah${symbol}`,
+    `${nativeChainID}-LOCAL-${symbol}ah`,
     `${nativeChainID}-ERC20-${symbol}`,
-    `${nativeChainID}-ERC721-${symbol}`
+    `${nativeChainID}-LOCAL-W${symbol}`,
+    `${nativeChainID}-LOCAL-${symbol}W`,
+    `${nativeChainID}-native-${symbol.toLowerCase()}`,
+    `${nativeChainID}-local-${symbol.toLowerCase()}`
   ];
 
-  const matchedAsset = assets?.find((asset) => {
-    const isSlugMatch = possibleSlugs.some((slug) =>
-      asset.slug?.toLowerCase().startsWith(slug.toLowerCase())
+  const slugMatch = assets?.find((asset) =>
+    possibleSlugs.some(
+      (slug) => asset.slug?.toLowerCase() === slug.toLowerCase()
+    )
+  );
+
+  if (slugMatch) {
+    return {
+      ...xcAssetData,
+      name: slugMatch.name,
+      icon: slugMatch.icon ?? undefined
+    };
+  }
+
+  const exactSymbolMatch = assets?.find(
+    (asset) => asset.symbol?.toLowerCase() === symbol.toLowerCase()
+  );
+
+  const prefixSymbolMatch = assets?.find((asset) => {
+    const assetSymbol = asset.symbol?.toLowerCase();
+    const targetSymbol = symbol.toLowerCase();
+    return (
+      assetSymbol === `ah${targetSymbol}` ||
+      assetSymbol === `${targetSymbol}ah` ||
+      assetSymbol === `w${targetSymbol}` ||
+      assetSymbol === `${targetSymbol}w`
     );
-    const isSymbolMatch = asset.symbol?.toLowerCase() === symbol.toLowerCase();
-    return isSlugMatch || isSymbolMatch;
   });
 
-  const icon = matchedAsset
-    ? matchedAsset?.icon
-    : assets?.find((v) => v.symbol === symbol)?.icon;
+  function findIconBySymbol(symbol: string, assets: Asset[]) {
+    return assets?.find((asset) => {
+      const assetSymbol = asset.symbol?.toLowerCase();
+      const targetSymbol = symbol.toLowerCase();
+
+      return (
+        assetSymbol === targetSymbol ||
+        assetSymbol === `ah${targetSymbol}` ||
+        assetSymbol === `${targetSymbol}ah` ||
+        targetSymbol === `ah${assetSymbol}` ||
+        targetSymbol === `${assetSymbol}ah` ||
+        assetSymbol === `w${targetSymbol}` ||
+        assetSymbol === `${targetSymbol}w` ||
+        targetSymbol === `w${assetSymbol}` ||
+        targetSymbol === `${assetSymbol}w`
+      );
+    })?.icon;
+  }
+
+  const bestMatch = exactSymbolMatch || prefixSymbolMatch || slugMatch;
 
   return {
     ...xcAssetData,
-    name: matchedAsset?.name ?? undefined,
-    icon: icon ?? undefined
+    name: bestMatch?.name ?? undefined,
+    icon: bestMatch?.icon ?? findIconBySymbol(symbol, assets) ?? undefined
   };
 }
