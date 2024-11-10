@@ -1,48 +1,62 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose
-} from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
-import { cn } from '@/lib/utils';
-
-interface WalletAddress {
-  address: string;
-  chainId: string;
-}
+import { cn, isValidAddress } from '@/lib/utils';
+import type { ChainInfoWithXcAssetsData } from '@/store/chains';
 
 interface RecipientModalProps {
+  value: string;
+  chain?: ChainInfoWithXcAssetsData;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (address: WalletAddress) => void;
-  selectedChain?: string;
+  onSave: (address: string) => void;
 }
 
 export function RecipientModal({
+  value,
+  chain,
   isOpen,
   onClose,
-  onSave,
-  selectedChain
+  onSave
 }: RecipientModalProps) {
   const [address, setAddress] = useState('');
   const [isError, setIsError] = useState(false);
 
-  function handleSave() {
-    // 这里应该添加地址验证逻辑
-    // if (!isValidAddress(address, selectedChain)) {
-    //   setIsError(true);
-    //   return;
-    // }
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setAddress(e.target.value);
+    setIsError(false);
+  }, []);
 
-    onSave({ address, chainId: selectedChain || '' });
+  const handleSave = useCallback(() => {
+    console.log('chain', chain);
+    if (
+      !isValidAddress({
+        address,
+        chainType: chain?.evmInfo ? 'evm' : 'substrate',
+        expectedPrefix: chain?.substrateInfo?.addressPrefix
+      })
+    ) {
+      setIsError(true);
+      return;
+    }
+
+    onSave(address);
+    setIsError(false);
     onClose();
-  }
+  }, [address, chain, onSave, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setAddress('');
+      setIsError(false);
+      return;
+    }
+
+    if (value) setAddress(value);
+  }, [isOpen, value]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -58,7 +72,7 @@ export function RecipientModal({
           <div className="flex items-center gap-[10px] rounded-[10px] bg-[#F2F3F5] p-[10px]">
             <input
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={handleChange}
               placeholder="Enter recipient address"
               className={cn(
                 'w-full bg-transparent text-[14px] font-bold text-[#242A2E] placeholder:text-[#12161950] focus-visible:outline-none',
@@ -71,7 +85,7 @@ export function RecipientModal({
           {isError && (
             <p className="text-[12px] font-normal leading-normal text-[#000]">
               Wallet address is invalid for selected destination chain{' '}
-              <span className="text-[#FF0083]">Darwinia</span>.
+              <span className="text-[#FF0083]">{chain?.name}</span>.
             </p>
           )}
 

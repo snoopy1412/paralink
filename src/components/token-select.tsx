@@ -1,41 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import Image from 'next/image';
 import { ChevronDown } from 'lucide-react';
 import { TokenSelectDialog } from './token-select-dialog';
 import { useNumberInput } from '@/hooks/number-input';
 import { cn } from '@/lib/utils';
+import { TokenWithBalance } from '@/types/token';
 
-const mockTokens = [
-  {
-    symbol: 'USDT',
-    name: 'Tether USD',
-    icon: '/images/test3.svg',
-    balance: '5,000.33',
-    address: '0x4h716...12f4hfw'
-  },
-  {
-    symbol: 'RING',
-    name: 'Darwinia Network',
-    icon: '/images/test3.svg',
-    balance: '30.33',
-    address: '0x4h716...12f4hhw'
-  }
-];
 interface TokenSelectProps {
-  token: {
-    symbol: string;
-    icon: string;
-    balance: string;
-  };
-  onSelect?: () => void;
+  token?: TokenWithBalance;
+  tokens?: TokenWithBalance[];
+  onChangeToken?: (token: TokenWithBalance) => void;
+  onChangeAmount?: (value: string) => void;
 }
 
-export function TokenSelect({ token, onSelect }: TokenSelectProps) {
-  const [amount, setAmount] = useState('');
+export function TokenSelect({
+  token,
+  tokens,
+  onChangeToken,
+  onChangeAmount
+}: TokenSelectProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedToken, setSelectedToken] = useState(mockTokens[0]);
 
   const { value, handleChange, handleBlur } = useNumberInput({
     // maxDecimals: 6,
@@ -43,35 +29,67 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
     maxDecimals: 10000,
     minValue: 0,
     initialValue: '',
-    onChange: (value) => console.log('Current value:', value)
+    onChange: onChangeAmount
   });
 
   function handleOpenDialog() {
+    if (!tokens?.length) {
+      return;
+    }
     setIsDialogOpen(true);
   }
 
-  console.log('value', value);
+  const handleSelect = useCallback(
+    (token: TokenWithBalance) => {
+      console.log('token', token);
+
+      onChangeToken?.(token);
+      setIsDialogOpen(false);
+    },
+    [onChangeToken]
+  );
 
   return (
     <>
       <div className="flex items-center gap-[10px] rounded-[10px] bg-[#F2F3F5] p-[10px]">
-        <div className="relative h-[40px] w-[40px]">
-          <Image src={token.icon} alt={token.symbol} fill />
+        <div className="relative h-[40px] w-[40px] flex-shrink-0">
+          <Image
+            src={token?.icon ?? '/images/default-token.svg'}
+            alt={token?.symbol ?? 'no icon'}
+            fill
+          />
         </div>
 
         <div className="grid w-full grid-cols-2 items-center gap-[10px]">
           <div
-            className="flex cursor-pointer flex-col items-start transition-opacity hover:opacity-80"
+            className={cn(
+              'flex cursor-pointer flex-col items-start transition-opacity hover:opacity-80',
+              !tokens?.length && 'pointer-events-none opacity-50'
+            )}
             onClick={handleOpenDialog}
           >
-            <div className="flex items-center gap-[5px] leading-normal">
-              <span className="text-[18px] font-bold">{token.symbol}</span>
-              <ChevronDown className="h-4 w-4" />
-            </div>
-            <span className="text-[12px] font-normal leading-normal text-[#12161950]">
-              Balance:
-              <span className="font-mono tabular-nums">{token.balance}</span>
-            </span>
+            {!!token ? (
+              <>
+                <div className="flex items-center gap-[5px] leading-normal">
+                  <span className="text-[18px] font-bold">
+                    {token?.symbol || ''}
+                  </span>
+                  <ChevronDown className="h-4 w-4" />
+                </div>
+                <span className="text-[12px] font-normal leading-normal text-[#12161950]">
+                  Balance:
+                  <span className="font-mono tabular-nums">
+                    {token?.balance || '0.00'}
+                  </span>
+                </span>
+              </>
+            ) : (
+              <div className="flex items-center gap-[5px] leading-normal">
+                <span className="text-[14px] font-normal leading-normal text-[#12161950]">
+                  No token selected
+                </span>
+              </div>
+            )}
           </div>
           <div className="flex flex-col items-end">
             <input
@@ -87,7 +105,10 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
               onBlur={handleBlur}
             />
             <span className="text-[12px] font-normal leading-normal text-[#12161950]">
-              ≈ $ <span className="font-mono tabular-nums">0.00</span>
+              ≈ ${' '}
+              <span className="font-mono tabular-nums">
+                {token?.price || '0.00'}
+              </span>
             </span>
           </div>
         </div>
@@ -95,11 +116,8 @@ export function TokenSelect({ token, onSelect }: TokenSelectProps) {
       <TokenSelectDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}
-        onSelect={(token) => {
-          setSelectedToken(token);
-          setIsDialogOpen(false);
-        }}
-        tokens={mockTokens}
+        onSelect={handleSelect}
+        tokens={tokens || []}
       />
     </>
   );

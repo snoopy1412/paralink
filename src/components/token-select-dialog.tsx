@@ -1,31 +1,24 @@
 'use client';
 
+import Image from 'next/image';
+import { ExternalLink, Search } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
-
 import { ScrollArea } from '@/components/ui/scroll-area';
-import Image from 'next/image';
-import { ExternalLink, Search } from 'lucide-react';
-import { useState, useMemo, useEffect } from 'react';
 import { Empty } from './empty';
 
-interface Token {
-  symbol: string;
-  name: string;
-  icon: string;
-  balance: string;
-  address: string;
-}
+import type { TokenWithBalance } from '@/types/token';
 
 interface TokenSelectDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (token: Token) => void;
-  tokens: Token[];
+  onSelect: (token: TokenWithBalance) => void;
+  tokens: TokenWithBalance[];
 }
 
 export function TokenSelectDialog({
@@ -43,8 +36,8 @@ export function TokenSelectDialog({
     return tokens.filter(
       (token) =>
         token.symbol.toLowerCase().includes(query) ||
-        token.name.toLowerCase().includes(query) ||
-        token.address.toLowerCase().includes(query)
+        token.name?.toLowerCase().includes(query) ||
+        token?.address?.toLowerCase().includes(query)
     );
   }, [tokens, searchQuery]);
 
@@ -91,14 +84,14 @@ export function TokenSelectDialog({
                 {filteredTokens?.length
                   ? filteredTokens?.map((token) => (
                       <div
-                        key={token.address}
-                        onSelect={() => onSelect(token)}
+                        key={token?.symbol}
+                        onClick={() => onSelect(token)}
                         className="flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius)] px-[10px] py-[10px] transition-all hover:bg-[#12161910] hover:opacity-80"
                       >
                         <div className="relative h-[34px] w-[34px]">
                           <Image
-                            src={token.icon}
-                            alt={token.symbol}
+                            src={token?.icon || '/images/default-token.svg'}
+                            alt={token?.symbol}
                             fill
                             className="rounded-full"
                           />
@@ -106,27 +99,31 @@ export function TokenSelectDialog({
                         <div className="flex flex-1 items-center gap-[10px]">
                           <div className="flex flex-1 flex-col">
                             <span className="truncate text-[16px] font-bold leading-normal">
-                              {token.symbol}
+                              {token?.symbol}
                             </span>
                             <div className="item-start flex flex-col gap-[5px] md:flex-row md:items-center">
                               <span className="text-[12px] text-[#121619]">
-                                {token.name}
+                                {token?.name}
                               </span>
-                              <div className="flex items-center gap-[5px]">
-                                <span className="font-mono text-[12px] tabular-nums text-[#878A92]">
-                                  {token.address.slice(0, 6)}...
-                                  {token.address.slice(-6)}
-                                </span>
-                                <ExternalLink
-                                  className="h-3 w-3"
-                                  color="#12161950"
-                                />
-                              </div>
+                              {token?.address ? (
+                                <div className="flex items-center gap-[5px]">
+                                  <span className="font-mono text-[12px] tabular-nums text-[#878A92]">
+                                    {token?.address?.slice(0, 6)}...
+                                    {token?.address?.slice(-6)}
+                                  </span>
+                                  <ExternalLink
+                                    className="h-3 w-3"
+                                    color="#12161950"
+                                  />
+                                </div>
+                              ) : null}
                             </div>
                           </div>
-                          <span className="text-right font-mono text-[16px] font-bold tabular-nums">
-                            {token.balance}
-                          </span>
+                          {token?.balance ? (
+                            <span className="text-right font-mono text-[16px] font-bold tabular-nums">
+                              {token.balance}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     ))
