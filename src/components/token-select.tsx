@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import Image from 'next/image';
 import { ChevronDown } from 'lucide-react';
+import { FallbackImage } from '@/components/ui/fallback-image';
 import { TokenSelectDialog } from './token-select-dialog';
 import { useNumberInput } from '@/hooks/number-input';
 import { cn } from '@/lib/utils';
@@ -54,8 +54,9 @@ export function TokenSelect({
       {token ? (
         <div className="flex items-center gap-[10px] rounded-[10px] bg-[#F2F3F5] p-[10px]">
           <div className="relative h-[40px] w-[40px] flex-shrink-0">
-            <Image
+            <FallbackImage
               src={token?.icon ?? '/images/default-token.svg'}
+              fallbackSrc="/images/default-token.svg"
               alt={token?.symbol ?? 'no icon'}
               fill
             />

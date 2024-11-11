@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { ExternalLink, Search } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import {
@@ -10,6 +9,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { FallbackImage } from '@/components/ui/fallback-image';
 import { Empty } from './empty';
 
 import type { TokenWithBalance } from '@/types/token';
@@ -89,8 +89,9 @@ export function TokenSelectDialog({
                         className="flex w-full cursor-pointer items-center justify-between gap-[10px] rounded-[var(--radius)] px-[10px] py-[10px] transition-all hover:bg-[#12161910] hover:opacity-80"
                       >
                         <div className="relative h-[34px] w-[34px]">
-                          <Image
+                          <FallbackImage
                             src={token?.icon || '/images/default-token.svg'}
+                            fallbackSrc="/images/default-token.svg"
                             alt={token?.symbol}
                             fill
                             className="rounded-full"

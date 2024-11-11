@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -10,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle
 } from '@/components/ui/dialog';
+import { FallbackImage } from './ui/fallback-image';
 import { ScrollArea } from './ui/scroll-area';
 import { Empty } from './empty';
 import type { ChainInfoWithXcAssetsData } from '@/store/chains';
@@ -46,8 +46,9 @@ export const ChainSelect = ({
         className="flex h-[59px] cursor-pointer items-center gap-[10px] rounded-[var(--radius)] bg-[#F2F3F5] p-[10px] transition-opacity hover:opacity-80"
         onClick={handleClick}
       >
-        <Image
+        <FallbackImage
           src={chain?.icon || '/images/default-chain.svg'}
+          fallbackSrc="/images/default-chain.svg"
           alt="assets"
           width={24}
           height={24}
@@ -93,8 +94,9 @@ export const ChainSelect = ({
                       key={chain?.id}
                       onClick={() => handleChange(chain?.id)}
                     >
-                      <Image
+                      <FallbackImage
                         src={chain.icon || '/images/default-chain.svg'}
+                        fallbackSrc="/images/default-chain.svg"
                         alt={chain.name}
                         width={34}
                         height={34}
