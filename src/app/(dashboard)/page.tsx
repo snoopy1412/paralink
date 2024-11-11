@@ -1,6 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
+import ss58 from '@substrate/ss58-registry';
 import { AddressInput } from '@/components/address-input';
 import Alert from '@/components/alert';
 import { FeeBreakdown } from '@/components/fee-breakdown';
@@ -136,17 +137,23 @@ export default function Dashboard() {
         const supportedParaChains = await getSupportedParaChains(polkadotAsset);
         const chainAssets = await fetchChainsInfo();
         const assetsInfo = await fetchAssetsInfo();
-
         const supportedChains = supportedParaChains
           ?.map((chain) => {
             const chainAsset = chainAssets?.find(
               (v) => v.substrateInfo?.paraId?.toString() === chain.id
             );
+            const ss58Format = ss58.find(
+              (v) => v.prefix === chainAsset?.substrateInfo?.addressPrefix
+            );
+
             return chainAsset
               ? {
                   ...chainAsset,
                   id: chain?.id?.toString(),
-                  xcAssetsData: chain?.xcAssetsData
+                  xcAssetsData: chain?.xcAssetsData,
+                  isEvmChain:
+                    ss58Format?.standardAccount === 'secp256k1' &&
+                    !!chainAsset?.evmInfo
                 }
               : null;
           })
@@ -270,17 +277,10 @@ export default function Dashboard() {
               finalAmount={99.97}
             />
             <div className="h-[1px] w-full bg-[#F2F3F5]"></div>
-            {/* <Button
-              className="w-full rounded-[10px] font-bold"
-              color="primary"
-              onClick={handleClick}
-            >
+
+            <ConnectOrActionButton onAction={handleClick}>
               Confirm Transaction
-            </Button> */}
-            <ConnectOrActionButton
-              actionText="Confirm Transaction"
-              onAction={handleClick}
-            />
+            </ConnectOrActionButton>
           </div>
 
           {/* <TransactionDetail isOpen={true} onClose={() => {}} /> */}

@@ -11,28 +11,27 @@ import { useWagmiChainStore } from '@/store/wagmiChain';
 import { PolkadotWalletConnectDialog } from '@/components/polkadot-wallet-connect';
 import { useState } from 'react';
 
-interface ConnectOrActionButtonProps {
-  actionText: string;
-  onAction: () => void;
+import type { ButtonProps } from '@/components/ui/button';
+
+interface ConnectOrActionButtonProps extends ButtonProps {
+  children: React.ReactNode;
+  disconnectText?: string | boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
   className?: string;
-  color?: 'primary' | 'secondary' | 'default';
-  loadingText?: string;
-  connectText?: string;
-  disabled?: boolean; // 额外的禁用控制
+  disabled?: boolean;
+  onAction?: () => void;
 }
 
 export function ConnectOrActionButton({
-  actionText,
-  onAction,
+  children,
+  disconnectText = 'Disconnect Wallet',
   isDisabled = false,
   isLoading = false,
   className,
-  color = 'primary',
-  loadingText = 'Pending...',
-  connectText = 'Connect Wallet',
-  disabled = false
+  disabled = false,
+  onAction,
+  ...props
 }: ConnectOrActionButtonProps) {
   const fromChain = useChainsStore((state) => state.getFromChain());
   const [isPolkadotWalletDialogOpen, setIsPolkadotWalletDialogOpen] =
@@ -44,7 +43,7 @@ export function ConnectOrActionButton({
   const handleClick = () => {
     if (isLoading) return;
     if (!isConnected) {
-      if (fromChain?.evmInfo) {
+      if (fromChain?.isEvmChain && fromChain?.evmInfo) {
         if (!fromChain?.providers) return;
         const rpcUrls = convertToEvmRpcUrls(fromChain?.providers);
 
@@ -59,18 +58,12 @@ export function ConnectOrActionButton({
           rpcUrls
         });
         openConnectModal?.();
-      } else if (fromChain?.substrateInfo) {
+      } else {
         setIsPolkadotWalletDialogOpen(true);
       }
       return;
     }
-    onAction();
-  };
-
-  const getButtonText = () => {
-    if (isLoading) return loadingText;
-    if (!isConnected) return connectText;
-    return actionText;
+    onAction?.();
   };
 
   const isButtonDisabled = disabled || isLoading || (isConnected && isDisabled);
@@ -79,12 +72,12 @@ export function ConnectOrActionButton({
     <>
       <Button
         className={cn('w-full rounded-[10px] font-bold', className)}
-        color={color}
         onClick={handleClick}
         disabled={isButtonDisabled}
+        {...props}
       >
         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {getButtonText()}
+        {!isConnected && !!disconnectText ? 'Connect Wallet' : children}
       </Button>
       <PolkadotWalletConnectDialog
         isOpen={isPolkadotWalletDialogOpen}

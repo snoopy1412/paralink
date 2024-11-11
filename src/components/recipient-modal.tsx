@@ -31,11 +31,10 @@ export function RecipientModal({
   }, []);
 
   const handleSave = useCallback(() => {
-    console.log('chain', chain);
     if (
       !isValidAddress({
         address,
-        chainType: chain?.evmInfo ? 'evm' : 'substrate',
+        chainType: chain?.isEvmChain ? 'evm' : 'substrate',
         expectedPrefix: chain?.substrateInfo?.addressPrefix
       })
     ) {

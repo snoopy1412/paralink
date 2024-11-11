@@ -18,7 +18,7 @@ export function Connected() {
   const fromChain = useChainsStore((state) => state.getFromChain());
 
   const currentChainInfo = useMemo(() => {
-    if (fromChain?.evmInfo && evmAddress) {
+    if (fromChain?.isEvmChain && evmAddress) {
       return {
         icon: '/images/wallet/metamask.png',
         name: fromChain.name,

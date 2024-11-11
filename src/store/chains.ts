@@ -5,6 +5,7 @@ import type { XcAssetData } from '@/types/asset-registry';
 export interface ChainInfoWithXcAssetsData extends ChainInfo {
   id: string;
   xcAssetsData?: XcAssetData[];
+  isEvmChain?: boolean;
 }
 
 export type ChainsState = {

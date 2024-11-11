@@ -1,4 +1,5 @@
 import { useAccount } from 'wagmi';
+import { formatSubstrateAddress } from '@/utils/address';
 import { useWalletStore } from '@/store/wallet';
 import useChainsStore from '@/store/chains';
 
@@ -7,6 +8,7 @@ interface WalletConnection {
   evmAddress?: `0x${string}`;
   substrateAddress?: string;
   isWrongNetwork: boolean;
+  currentAddress?: string;
 }
 
 export function useWalletConnection(): WalletConnection {
@@ -16,22 +18,26 @@ export function useWalletConnection(): WalletConnection {
 
   if (!fromChain) return { isConnected: false, isWrongNetwork: false };
 
-  if (fromChain.evmInfo) {
-    const isWrongNetwork = chainId !== fromChain.evmInfo.evmChainId;
-    return {
-      isConnected: !!address && !isWrongNetwork,
-      evmAddress: address,
-      isWrongNetwork
-    };
-  }
+  const isWrongNetwork =
+    fromChain?.isEvmChain && fromChain?.evmInfo
+      ? chainId !== fromChain?.evmInfo?.evmChainId
+      : false;
 
-  if (fromChain.substrateInfo) {
-    return {
-      isConnected: !!selectedAccount,
-      substrateAddress: selectedAccount?.address,
-      isWrongNetwork: false
-    };
-  }
+  const substrateAddress = formatSubstrateAddress({
+    account: selectedAccount ?? undefined,
+    chain: fromChain
+  });
 
-  return { isConnected: false, isWrongNetwork: false };
+  const getConnectedAddress = () => {
+    if (fromChain?.isEvmChain) return !!address;
+    return !!selectedAccount?.address;
+  };
+
+  return {
+    isConnected: getConnectedAddress(),
+    evmAddress: address,
+    substrateAddress,
+    isWrongNetwork,
+    currentAddress: fromChain.isEvmChain ? address : selectedAccount?.address
+  };
 }
