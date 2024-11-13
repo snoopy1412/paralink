@@ -99,7 +99,7 @@ export function TokenSelect({
               <span className="text-[12px] font-normal leading-normal text-[#12161950]">
                 ≈ ${' '}
                 <span className="font-mono tabular-nums">
-                  {token?.price || '0.00'}
+                  {token?.balance || '0.00'}
                 </span>
               </span>
             </div>

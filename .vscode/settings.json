@@ -6,6 +6,7 @@
         "Paralink",
         "polkadot",
         "rainbowkit",
-        "Wagmi"
+        "Wagmi",
+        "zustand"
     ]
 }

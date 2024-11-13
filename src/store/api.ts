@@ -10,8 +10,8 @@ interface ApiState {
 }
 
 interface ApiActions {
-  connectFromChainApi: (wsEndpoint: string) => Promise<void>;
-  connectToChainApi: (wsEndpoint: string) => Promise<void>;
+  connectFromChainApi: (wsEndpoint: string) => Promise<ApiPromise | undefined>;
+  connectToChainApi: (wsEndpoint: string) => Promise<ApiPromise | undefined>;
   disconnectFromChainApi: () => Promise<void>;
   disconnectToChainApi: () => Promise<void>;
   disconnectAll: () => Promise<void>;
@@ -24,7 +24,9 @@ const useApiStore = create<ApiState & ApiActions>((set, get) => ({
   isConnecting: false,
   error: null,
 
-  connectFromChainApi: async (wsEndpoint: string) => {
+  connectFromChainApi: async (
+    wsEndpoint: string
+  ): Promise<ApiPromise | undefined> => {
     try {
       set({ isConnecting: true, error: null });
       await get().disconnectFromChainApi();
@@ -36,6 +38,7 @@ const useApiStore = create<ApiState & ApiActions>((set, get) => ({
         }
       });
       set({ fromChainApi: api });
+      return api;
     } catch (error) {
       set({ error: error as Error });
       console.error('Failed to connect from chain:', error);
@@ -44,7 +47,9 @@ const useApiStore = create<ApiState & ApiActions>((set, get) => ({
     }
   },
 
-  connectToChainApi: async (wsEndpoint: string) => {
+  connectToChainApi: async (
+    wsEndpoint: string
+  ): Promise<ApiPromise | undefined> => {
     try {
       set({ isConnecting: true, error: null });
       await get().disconnectToChainApi();
@@ -56,6 +61,7 @@ const useApiStore = create<ApiState & ApiActions>((set, get) => ({
         }
       });
       set({ toChainApi: api });
+      return api;
     } catch (error) {
       set({ error: error as Error });
       console.error('Failed to connect to chain:', error);

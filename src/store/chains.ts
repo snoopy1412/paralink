@@ -11,13 +11,17 @@ export interface ChainInfoWithXcAssetsData extends ChainInfo {
 export type ChainsState = {
   chains: ChainInfoWithXcAssetsData[];
   fromChainId?: string;
+  fromChains?: ChainInfoWithXcAssetsData[];
   toChainId?: string;
+  toChains?: ChainInfoWithXcAssetsData[];
 };
 
 export type ChainsActions = {
   setChains: (chains: ChainInfoWithXcAssetsData[]) => void;
   setFromChainId: (chainId: string) => void;
+  setFromChains: (chains: ChainInfoWithXcAssetsData[]) => void;
   setToChainId: (chainId: string) => void;
+  setToChains: (chains: ChainInfoWithXcAssetsData[]) => void;
 };
 
 export type ChainsSelectors = {
@@ -33,7 +37,11 @@ const useChainsStore = create<ChainsState & ChainsActions & ChainsSelectors>(
     toChainId: undefined,
     setChains: (chains: ChainInfoWithXcAssetsData[]) => set({ chains }),
     setFromChainId: (chainId: string) => set({ fromChainId: chainId }),
+    setFromChains: (chains: ChainInfoWithXcAssetsData[]) =>
+      set({ fromChains: chains }),
     setToChainId: (chainId: string) => set({ toChainId: chainId }),
+    setToChains: (chains: ChainInfoWithXcAssetsData[]) =>
+      set({ toChains: chains }),
     getChainById: (chainId?: string) => {
       if (!chainId) return undefined;
       return get().chains.find((chain) => chain.id === chainId);

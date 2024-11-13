@@ -1,7 +1,6 @@
 'use client';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useShallow } from 'zustand/react/shallow';
-import ss58 from '@substrate/ss58-registry';
 import { AddressInput } from '@/components/address-input';
 import Alert from '@/components/alert';
 import { FeeBreakdown } from '@/components/fee-breakdown';
@@ -9,92 +8,83 @@ import { TokenSelect } from '@/components/token-select';
 import { Button } from '@/components/ui/button';
 import { ConnectOrActionButton } from '@/components/connect-or-action-button';
 // import { TransactionDetail } from '@/components/transaction-detail';
-import {
-  getDestinationParaChains,
-  getSupportedParaChains,
-  getTokenFromXcAsset
-} from '@/lib/registry';
-import { fetchAssetsInfo, fetchChainsInfo } from '@/services/fetch-assets';
-import type { ChainInfoWithXcAssetsData } from '@/store/chains';
-import { Asset } from '@/types/assets-info';
 import useChainsStore from '@/store/chains';
-import { fetchPolkadotAssetRegistry } from '@/services/fetch-asset-registry';
 import { ChainSwitcher } from './_components/chain-switcher';
 import Loading from './_components/loading';
 
-import type { TokenWithBalance } from '@/types/token';
-import useApiStore from '@/store/api';
-import { findBestWssEndpoint } from '@/utils/rpc-endpoint';
-import { getAssetBalance } from '@/lib/chain/balance';
 import { useWalletConnection } from '@/hooks/use-wallet-connection';
-import { BN } from '@polkadot/util';
+import { useChainInitialization } from './_hooks/use-chain-initlization';
+import { useCrossChainSetup } from './_hooks/use-cross-chain-setup';
+import useTokensStore from '@/store/tokens';
+import { useApiConnection } from './_hooks/use-api-connection';
+import { getTokensWithBalanceForChain } from '@/services/tokens';
 
 export default function Dashboard() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [fromParachains, setFromParachains] = useState<
-    ChainInfoWithXcAssetsData[]
-  >([]);
-  const [toParachains, setToParachains] = useState<ChainInfoWithXcAssetsData[]>(
-    []
-  );
-  const [tokens, setTokens] = useState<TokenWithBalance[]>([]);
-  const [selectedToken, setSelectedToken] = useState<TokenWithBalance>();
   const [amount, setAmount] = useState<string>('');
-
   const [recipientAddress, setRecipientAddress] = useState<string>('');
-  const { substrateAddress, evmAddress } = useWalletConnection();
 
+  const { substrateAddress, evmAddress } = useWalletConnection();
+  const { isLoading, isError, assets } = useChainInitialization();
+  const { setupCrossChainConfig, swapChains } = useCrossChainSetup();
   const {
     chains,
-    setChains,
     fromChainId,
+    fromChains,
+    fromChain,
     toChainId,
-    setFromChainId,
-    setToChainId
+    setToChainId,
+    toChain,
+    toChains
   } = useChainsStore(
     useShallow((state) => ({
       chains: state.chains,
       setChains: state.setChains,
       fromChainId: state.fromChainId,
       toChainId: state.toChainId,
-      setFromChainId: state.setFromChainId,
-      setToChainId: state.setToChainId
+      setToChainId: state.setToChainId,
+      fromChains: state.fromChains,
+      toChains: state.toChains,
+      fromChain: state.getFromChain(),
+      toChain: state.getToChain()
     }))
   );
-
-  const fromChain = useChainsStore((state) => state.getFromChain());
-  const toChain = useChainsStore((state) => state.getToChain());
-
-  const { fromChainApi, connectFromChainApi } = useApiStore(
+  const { setTokens, tokens, setSelectedToken, selectedToken } = useTokensStore(
     useShallow((state) => ({
-      fromChainApi: state.fromChainApi,
-      connectFromChainApi: state.connectFromChainApi
+      setTokens: state.setTokens,
+      tokens: state.tokens,
+      setSelectedToken: state.setSelectedToken,
+      selectedToken: state.selectedToken
     }))
   );
 
-  const setupCrossChainConfig = useCallback(
-    (chains: ChainInfoWithXcAssetsData[], initialFromId?: string) => {
-      const fromChains = chains?.filter((v) => v.xcAssetsData?.length);
-      const fromChainId = initialFromId ? initialFromId : fromChains?.[0]?.id;
-      const toChains = getDestinationParaChains(chains, fromChainId);
-      const toChainId = toChains?.[0]?.id ?? '';
+  // init from chain api
+  const { fromChainApi } = useApiConnection({ fromChain });
 
-      setFromParachains(fromChains);
-      setFromChainId(fromChainId);
-      setToParachains(toChains);
-      setToChainId(toChainId);
-      return {
-        fromChains,
-        fromChainId,
-        toChains,
-        toChainId
-      };
-    },
-    [setFromChainId, setToChainId]
-  );
+  const fetchTokens = useCallback(async () => {
+    if (!fromChain || !toChainId || !assets.length) return;
+    const tokens = await getTokensWithBalanceForChain({
+      fromChain,
+      toChainId,
+      fromChainApi,
+      assets,
+      evmAddress,
+      substrateAddress
+    });
+
+    if (tokens?.length) {
+      setTokens(tokens);
+      setSelectedToken(tokens[0]);
+    }
+  }, [
+    fromChain,
+    toChainId,
+    fromChainApi,
+    assets,
+    setTokens,
+    setSelectedToken,
+    evmAddress,
+    substrateAddress
+  ]);
 
   const handleChangeFromChainId = useCallback(
     (id: string) => {
@@ -103,174 +93,24 @@ export default function Dashboard() {
     [chains, setupCrossChainConfig]
   );
 
+  const handleSwitch = useCallback(() => {
+    if (!chains?.length || !fromChainId || !toChainId) return;
+    setSelectedToken(undefined);
+    setAmount('');
+    swapChains({
+      chains,
+      fromChainId,
+      toChainId
+    });
+  }, [setSelectedToken, swapChains, chains, fromChainId, toChainId]);
+
   const handleClick = useCallback(() => {
     console.log('amount', amount);
   }, [amount]);
 
-  const handleSwitch = useCallback(() => {
-    if (!fromChainId || !toChainId) return;
-    setSelectedToken(undefined);
-    setAmount('');
-    const newFromChainId = toChainId;
-    const newToChainId = fromChainId;
-    const newDestParachains = getDestinationParaChains(chains, newFromChainId);
-    setToParachains(newDestParachains);
-    setFromChainId(newFromChainId);
-    setToChainId(newToChainId);
-  }, [chains, fromChainId, setFromChainId, toChainId, setToChainId]);
-
   useEffect(() => {
-    if (fromChain && toChainId) {
-      const tokens = (fromChain?.xcAssetsData || [])
-        ?.filter((v) => v?.paraID?.toString() === toChainId)
-        .map((v) => {
-          const data = getTokenFromXcAsset({
-            xcAssetData: v,
-            assets: assets
-          });
-          return {
-            symbol: data?.symbol,
-            icon: data?.icon ?? '/images/default-token.svg',
-            name: data?.name ?? data?.symbol,
-            xcAssetData: v,
-            isNative: fromChain?.substrateInfo?.symbol === v?.symbol
-          };
-        });
-      if (tokens?.length) {
-        setTokens(tokens);
-        setSelectedToken(tokens[0]);
-      }
-    }
-  }, [fromChain, toChainId, assets]);
-
-  useEffect(() => {
-    const initData = async () => {
-      setIsLoading(true);
-      setIsError(false);
-      try {
-        const polkadotAsset = await fetchPolkadotAssetRegistry();
-        const supportedParaChains = await getSupportedParaChains(polkadotAsset);
-        const chainAssets = await fetchChainsInfo();
-        const assetsInfo = await fetchAssetsInfo();
-        const supportedChains = supportedParaChains
-          ?.map((chain) => {
-            const chainAsset = chainAssets?.find(
-              (v) => v.substrateInfo?.paraId?.toString() === chain.id
-            );
-            const ss58Format = ss58.find(
-              (v) => v.prefix === chainAsset?.substrateInfo?.addressPrefix
-            );
-
-            return chainAsset
-              ? {
-                  ...chainAsset,
-                  id: chain?.id?.toString(),
-                  xcAssetsData: chain?.xcAssetsData,
-                  isEvmChain:
-                    ss58Format?.standardAccount === 'secp256k1' &&
-                    !!chainAsset?.evmInfo
-                }
-              : null;
-          })
-          ?.filter((v) => !!v);
-
-        setChains(supportedChains);
-        setAssets(assetsInfo);
-        setupCrossChainConfig(supportedChains);
-        setIsLoading(false);
-      } catch (error) {
-        console.warn(error);
-        setIsError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initData();
-  }, [setChains, setupCrossChainConfig]);
-
-  useEffect(() => {
-    const initFromChainApi = async () => {
-      if (!fromChain?.providers) return;
-      const bestEndpoint = await findBestWssEndpoint(fromChain.providers);
-      console.log('bestEndpoint', bestEndpoint);
-      if (bestEndpoint) connectFromChainApi(bestEndpoint);
-    };
-    initFromChainApi();
-  }, [fromChain, connectFromChainApi]);
-
-  useEffect(() => {
-    const fetchTokensWithBalances = async () => {
-      if (!fromChain || !toChainId || !fromChainApi || !assets.length) return;
-
-      let address = '';
-      if (fromChain.isEvmChain) {
-        if (!evmAddress) return;
-        address = evmAddress;
-      } else {
-        if (!substrateAddress) return;
-        address = substrateAddress;
-      }
-
-      const tokensWithoutBalance = (fromChain.xcAssetsData || [])
-        ?.filter((v) => v?.paraID?.toString() === toChainId)
-        ?.map((v) => {
-          const data = getTokenFromXcAsset({
-            xcAssetData: v,
-            assets: assets
-          });
-          return {
-            symbol: data?.symbol,
-            icon: data?.icon ?? '/images/default-token.svg',
-            name: data?.name ?? data?.symbol,
-            xcAssetData: v,
-            isNative: fromChain?.substrateInfo?.symbol === v?.symbol,
-            balance: '0'
-          };
-        });
-
-      const tokensWithBalance = await Promise.all(
-        tokensWithoutBalance.map(async (token) => {
-          const balance = await getAssetBalance({
-            api: fromChainApi,
-            account: address,
-            assetId: token.xcAssetData?.asset ?? undefined
-          });
-
-          const decimals = token.xcAssetData?.decimals ?? 0;
-          const divisor = new BN(10).pow(new BN(decimals));
-          const transferrableBalance = balance
-            .div(divisor)
-            .toNumber()
-            .toFixed(4);
-
-          return {
-            ...token,
-            balance: transferrableBalance
-          };
-        })
-      );
-
-      if (tokensWithBalance?.length) {
-        setTokens(tokensWithBalance);
-        setSelectedToken(tokensWithBalance[0]);
-      }
-    };
-
-    fetchTokensWithBalances();
-  }, [
-    fromChain,
-    toChainId,
-    fromChainApi,
-    substrateAddress,
-    evmAddress,
-    assets
-  ]);
-
-  useEffect(() => {
-    return () => {
-      useApiStore.getState().disconnectAll();
-    };
-  }, []);
+    fetchTokens();
+  }, [fetchTokens]);
 
   return (
     <>
@@ -350,8 +190,8 @@ export default function Dashboard() {
               fromChain={fromChain}
               toChainId={toChainId}
               toChain={toChain}
-              fromParachains={fromParachains}
-              toParachains={toParachains}
+              fromParachains={fromChains}
+              toParachains={toChains}
               onChangeFromChain={handleChangeFromChainId}
               onChangeToChain={setToChainId}
               onSwitch={handleSwitch}
