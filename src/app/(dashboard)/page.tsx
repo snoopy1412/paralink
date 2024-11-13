@@ -23,6 +23,11 @@ import { ChainSwitcher } from './_components/chain-switcher';
 import Loading from './_components/loading';
 
 import type { TokenWithBalance } from '@/types/token';
+import useApiStore from '@/store/api';
+import { findBestWssEndpoint } from '@/utils/rpc-endpoint';
+import { getAssetBalance } from '@/lib/chain/balance';
+import { useWalletConnection } from '@/hooks/use-wallet-connection';
+import { BN } from '@polkadot/util';
 
 export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,6 +45,7 @@ export default function Dashboard() {
   const [amount, setAmount] = useState<string>('');
 
   const [recipientAddress, setRecipientAddress] = useState<string>('');
+  const { substrateAddress, evmAddress } = useWalletConnection();
 
   const {
     chains,
@@ -61,6 +67,13 @@ export default function Dashboard() {
 
   const fromChain = useChainsStore((state) => state.getFromChain());
   const toChain = useChainsStore((state) => state.getToChain());
+
+  const { fromChainApi, connectFromChainApi } = useApiStore(
+    useShallow((state) => ({
+      fromChainApi: state.fromChainApi,
+      connectFromChainApi: state.connectFromChainApi
+    }))
+  );
 
   const setupCrossChainConfig = useCallback(
     (chains: ChainInfoWithXcAssetsData[], initialFromId?: string) => {
@@ -118,7 +131,9 @@ export default function Dashboard() {
           return {
             symbol: data?.symbol,
             icon: data?.icon ?? '/images/default-token.svg',
-            name: data?.name ?? data?.symbol
+            name: data?.name ?? data?.symbol,
+            xcAssetData: v,
+            isNative: fromChain?.substrateInfo?.symbol === v?.symbol
           };
         });
       if (tokens?.length) {
@@ -172,6 +187,90 @@ export default function Dashboard() {
     };
     initData();
   }, [setChains, setupCrossChainConfig]);
+
+  useEffect(() => {
+    const initFromChainApi = async () => {
+      if (!fromChain?.providers) return;
+      const bestEndpoint = await findBestWssEndpoint(fromChain.providers);
+      console.log('bestEndpoint', bestEndpoint);
+      if (bestEndpoint) connectFromChainApi(bestEndpoint);
+    };
+    initFromChainApi();
+  }, [fromChain, connectFromChainApi]);
+
+  useEffect(() => {
+    const fetchTokensWithBalances = async () => {
+      if (!fromChain || !toChainId || !fromChainApi || !assets.length) return;
+
+      let address = '';
+      if (fromChain.isEvmChain) {
+        if (!evmAddress) return;
+        address = evmAddress;
+      } else {
+        if (!substrateAddress) return;
+        address = substrateAddress;
+      }
+
+      const tokensWithoutBalance = (fromChain.xcAssetsData || [])
+        ?.filter((v) => v?.paraID?.toString() === toChainId)
+        ?.map((v) => {
+          const data = getTokenFromXcAsset({
+            xcAssetData: v,
+            assets: assets
+          });
+          return {
+            symbol: data?.symbol,
+            icon: data?.icon ?? '/images/default-token.svg',
+            name: data?.name ?? data?.symbol,
+            xcAssetData: v,
+            isNative: fromChain?.substrateInfo?.symbol === v?.symbol,
+            balance: '0'
+          };
+        });
+
+      const tokensWithBalance = await Promise.all(
+        tokensWithoutBalance.map(async (token) => {
+          const balance = await getAssetBalance({
+            api: fromChainApi,
+            account: address,
+            assetId: token.xcAssetData?.asset ?? undefined
+          });
+
+          const decimals = token.xcAssetData?.decimals ?? 0;
+          const divisor = new BN(10).pow(new BN(decimals));
+          const transferrableBalance = balance
+            .div(divisor)
+            .toNumber()
+            .toFixed(4);
+
+          return {
+            ...token,
+            balance: transferrableBalance
+          };
+        })
+      );
+
+      if (tokensWithBalance?.length) {
+        setTokens(tokensWithBalance);
+        setSelectedToken(tokensWithBalance[0]);
+      }
+    };
+
+    fetchTokensWithBalances();
+  }, [
+    fromChain,
+    toChainId,
+    fromChainApi,
+    substrateAddress,
+    evmAddress,
+    assets
+  ]);
+
+  useEffect(() => {
+    return () => {
+      useApiStore.getState().disconnectAll();
+    };
+  }, []);
 
   return (
     <>

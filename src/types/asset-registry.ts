@@ -9,7 +9,7 @@ export interface ChainConfig {
 export interface ParaChainConfig {
   tokens: string[];
   assetsInfo: {
-    [assetId: string]: string; // 资产ID到资产符号的映射
+    [assetId: string]: string;
   };
   foreignAssetsInfo: {
     [key: string]: ForeignAssetInfo;
@@ -29,19 +29,27 @@ export interface ForeignAssetInfo {
   originChainReserveLocation: string;
 }
 
-export interface PoolPairInfo {
-  lpToken: string;
-  pairInfo: string; // JSON字符串,包含pair的具体配置
-}
+export type AssetType =
+  | string
+  | { ForeignAsset: string }
+  | { XCM: string }
+  | { Native: string }
+  | { Token: string }
+  | { Token2: string }
+  | { VToken2: string }
+  | { VSToken2: string };
 
 export interface XcAssetData {
   paraID: number;
-  nativeChainID: string;
+  nativeChainID: string | null;
   symbol: string;
   decimals: number;
   xcmV1MultiLocation: string;
-  asset: {
-    ForeignAsset: string;
-  };
+  asset: AssetType;
   assetHubReserveLocation: string;
+  originChainReserveLocation?: string;
+}
+export interface PoolPairInfo {
+  lpToken: string;
+  pairInfo: string;
 }
